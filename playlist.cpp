@@ -11,6 +11,8 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
+#include <QDebug>
+
 template <typename T>
 static T toCaseInsensitiveEnum(const QString& key, bool* ok) {
     auto enumerator = QMetaEnum::fromType<T>();
