@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
 
         std::cout << cyan;
         if (settings.contains("mac")) {
-            std::cout << "\tMAC: " << magenta << qPrintable(settings.value("url").toString()) << std::endl;
+            std::cout << "\tMAC: " << magenta << qPrintable(settings.value("mac").toString()) << std::endl;
         } else {
             std::cout << "\tMAC: " << magenta << qPrintable(mac()) << " (detected)" << std::endl;
         }
