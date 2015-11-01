@@ -8,6 +8,7 @@
 #include <QDir>
 #include <QUrl>
 #include <QTimer>
+#include <QVector>
 #include <QtNetwork/QNetworkAccessManager>
 
 #include <QJsonObject>
