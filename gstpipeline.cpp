@@ -3,17 +3,25 @@
 
 #include "gstpipeline.h"
 
-// TODO include in #ifdef
-#include <QtX11Extras/QX11Info>
-#include <QtPlatformHeaders/QEGLNativeContext>
-#include <QtPlatformHeaders/QGLXNativeContext>
-
 #define GST_USE_UNSTABLE_API
 #include <gst/gl/gstglconfig.h>
 #include <gst/gl/gstglcontext.h>
 #include <gst/gl/gstgldisplay.h>
-#include <gst/gl/egl/gstgldisplay_egl.h>
-#include <gst/gl/x11/gstgldisplay_x11.h>
+
+#if GST_GL_HAVE_PLATFORM_EGL
+	#include <QtPlatformHeaders/QEGLNativeContext>
+	#include <gst/gl/egl/gstgldisplay_egl.h>
+#endif
+
+#if GST_GL_HAVE_PLATFORM_GLX
+	#include <QtX11Extras/QX11Info>
+	#include <QtPlatformHeaders/QGLXNativeContext>
+	#include <gst/gl/x11/gstgldisplay_x11.h>
+#endif
+
+#if GST_GL_HAVE_PLATFORM_WGL
+	#include <QtPlatformHeaders/QWGLNativeContext>
+#endif
 
 GstreamerPipeline::GstreamerPipeline() {
     setObjectName("GstreamerPipeline");
