@@ -119,7 +119,7 @@ void GstreamerPipeline::_pausePipeline() {
     gst_element_set_state (GST_ELEMENT (_pipeline), GST_STATE_PAUSED);
     GstState state = GST_STATE_PAUSED;
     GstStateChangeReturn stateChange = gst_element_get_state(GST_ELEMENT (_pipeline), &state, NULL, GST_CLOCK_TIME_NONE);
-    if (stateChange == GST_STATE_CHANGE_FAILURE) {
+    if (stateChange == GST_STATE_CHANGE_FAILURE && state != GST_STATE_READY) {
         qDebug() << "failed to pause pipeline" << state;
         return;
     }
