@@ -68,6 +68,11 @@ static std::string cyan    = "\x1b[36;1m";
 static std::string restore = "\x1b[0m\n";
 
 int main(int argc, char *argv[]) {
+#ifdef Q_OS_WIN
+    QCoreApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
+    qputenv("GST_PLUGIN_PATH", "gstreamer");
+#endif
+	
     gst_init (NULL, NULL);
     QApplication::setApplicationName("disupurei");
     QApplication::setApplicationVersion("0.1");

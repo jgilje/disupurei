@@ -54,6 +54,13 @@ void GstreamerPipeline::initialize(QOpenGLContext *context) {
         gstContext = gst_gl_context_new_wrapped(gstDisplay, (guintptr) eglContext.context(), GST_GL_PLATFORM_EGL, GST_GL_API_GLES2);
     }
 #endif
+#if GST_GL_HAVE_PLATFORM_WGL
+    if (handle.canConvert<QWGLNativeContext>()) {
+        QWGLNativeContext wglContext = handle.value<QWGLNativeContext>();
+        gstDisplay = (GstGLDisplay *) gst_gl_display_new();
+        gstContext = gst_gl_context_new_wrapped(gstDisplay, (guintptr) wglContext.context(), GST_GL_PLATFORM_WGL, GST_GL_API_OPENGL);
+    }
+#endif
     if (gstDisplay == nullptr) {
         qWarning() << Q_FUNC_INFO << "Couldn't find display";
         return;
