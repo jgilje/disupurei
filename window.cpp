@@ -38,10 +38,10 @@
 **
 ****************************************************************************/
 
+#include "window.h"
+
 #include <QtWidgets>
 #include <QTimer>
-
-#include "window.h"
 
 DisupureiWindow::DisupureiWindow() {
     _layout.addWidget(&_videoPlayer);

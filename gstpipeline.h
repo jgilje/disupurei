@@ -2,7 +2,6 @@
 #define GSTPIPELINE_H
 
 #include <QThread>
-#include <QOpenGLWidget>
 
 #define GST_USE_UNSTABLE_API
 #include <gst/gl/gstglcontext.h>
@@ -10,6 +9,7 @@
 
 #include <asyncqueue.h>
 
+class QOpenGLContext;
 class GstreamerPipeline : public QObject
 {
     Q_OBJECT

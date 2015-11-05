@@ -41,6 +41,8 @@
 #ifndef VIDEOPLAYER_H
 #define VIDEOPLAYER_H
 
+#include "gstpipeline.h"
+
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 #include <QOpenGLBuffer>
@@ -49,9 +51,6 @@
 #include <QOpenGLTexture>
 
 #include <memory>
-
-// #include "gstreamerthread.h"
-#include "gstpipeline.h"
 
 class VideoPlayer : public QOpenGLWidget, protected QOpenGLFunctions {
     Q_OBJECT

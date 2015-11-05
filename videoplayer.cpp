@@ -1,11 +1,11 @@
+#include "videoplayer.h"
+
 #include <QGuiApplication>
 #include <QTimer>
 
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
 #include <QMouseEvent>
-
-#include "videoplayer.h"
 
 #define PROGRAM_VERTEX_ATTRIBUTE 0
 #define PROGRAM_TEXCOORD_ATTRIBUTE 1

@@ -1,12 +1,11 @@
 #include <QDebug>
-#include <QOpenGLContext>
 
 #include "gstpipeline.h"
 
 #define GST_USE_UNSTABLE_API
 #include <gst/gl/gstglconfig.h>
-#include <gst/gl/gstglcontext.h>
-#include <gst/gl/gstgldisplay.h>
+
+#include <QOpenGLContext>
 
 #if GST_GL_HAVE_PLATFORM_EGL
 	#include <QtPlatformHeaders/QEGLNativeContext>

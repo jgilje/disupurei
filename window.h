@@ -41,12 +41,12 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include <QOpenGLWidget>
-#include <QStackedLayout>
-
-#include "playlist.h"
 #include "videoplayer.h"
 #include "imageplayer.h"
+#include "playlist.h"
+
+#include <QOpenGLWidget>
+#include <QStackedLayout>
 
 class GLWidget;
 
