@@ -91,33 +91,17 @@ void VideoPlayer::paintGL() {
     glClearColor(clearColor.redF(), clearColor.greenF(), clearColor.blueF(), clearColor.alphaF());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    QMatrix4x4 m;
-    // m.perspective(M_PI / 2.0f, 16.0f / 9.0f, 0.1f, 1000.0f);
-    // m.ortho(-0.5f, +0.5f, +0.5f, -0.5f, 4.0f, 15.0f);
-    // m.translate(0.0f, 0.0f, -15.0f);
-
-    program->setUniformValue("matrix", m);
+    program->setUniformValue("matrix", matrix);
     program->enableAttributeArray(PROGRAM_VERTEX_ATTRIBUTE);
     program->enableAttributeArray(PROGRAM_TEXCOORD_ATTRIBUTE);
     program->setAttributeBuffer(PROGRAM_VERTEX_ATTRIBUTE, GL_FLOAT, 0, 3, 5 * sizeof(GLfloat));
     program->setAttributeBuffer(PROGRAM_TEXCOORD_ATTRIBUTE, GL_FLOAT, 3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
-    // (int location, GLenum type, int offset, int tupleSize, int stride = 0);
 
-    if (frame) {
-        guint tex_id;
-        GstVideoInfo v_info;
-        GstVideoFrame v_frame;
-        GstVideoMeta *v_meta;
+    glBindTexture (GL_TEXTURE_2D, textureId);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
-        v_meta = gst_buffer_get_video_meta (this->frame);
-        gst_video_info_set_format (&v_info, v_meta->format, v_meta->width, v_meta->height);
-        gst_video_frame_map (&v_frame, &v_info, this->frame, (GstMapFlags) (GST_MAP_READ | GST_MAP_GL));
-        tex_id = *(guint *) v_frame.data[0];
-
-        glBindTexture (GL_TEXTURE_2D, tex_id);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        gst_video_frame_unmap (&v_frame);
+    if (_pipeline) {
+        _pipeline->frameDrawn();
     }
 }
 
@@ -195,14 +179,9 @@ void VideoPlayer::videoSize(int width, int height) {
     makeObject();
 }
 
-void VideoPlayer::newFrame () {
-    /* frame is initialized as null */
-    if (this->frame)
-        _pipeline->queue_output_buf.put(this->frame);
+void VideoPlayer::newFrame (GLuint texture) {
+    textureId = texture;
 
-    this->frame = _pipeline->queue_input_buf.get ();
-
-    /* direct call to paintGL (no queued) */
     update();
 }
 
@@ -210,8 +189,8 @@ void VideoPlayer::initPipeline() {
     if (! _pipeline) {
         _pipeline = std::unique_ptr<GstreamerPipeline>(new GstreamerPipeline());
         _pipeline->initialize(context());
-        connect(_pipeline.get(), &GstreamerPipeline::newFrameReady, this, &VideoPlayer::newFrame, Qt::QueuedConnection);
-        connect(_pipeline.get(), &GstreamerPipeline::videoSize, this, &VideoPlayer::videoSize, Qt::QueuedConnection);
-        connect(_pipeline.get(), &GstreamerPipeline::finished, this, &VideoPlayer::finished, Qt::QueuedConnection);
+        connect(_pipeline.get(), &GstreamerPipeline::newFrameReady, this, &VideoPlayer::newFrame, Qt::DirectConnection);
+        connect(_pipeline.get(), &GstreamerPipeline::videoSize, this, &VideoPlayer::videoSize);
+        connect(_pipeline.get(), &GstreamerPipeline::finished, this, &VideoPlayer::finished);
     }
 }

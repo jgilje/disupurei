@@ -31,11 +31,7 @@ GstreamerPipeline::GstreamerPipeline() {
 }
 
 GstreamerPipeline::~GstreamerPipeline() {
-    frameDrawn();
     stop();
-
-    _thread.quit();
-    _thread.wait();
 }
 
 void GstreamerPipeline::initialize(QOpenGLContext *context) {
@@ -44,10 +40,12 @@ void GstreamerPipeline::initialize(QOpenGLContext *context) {
 
     QVariant handle = context->nativeHandle();
 #if GST_GL_HAVE_PLATFORM_GLX
+    gstDisplay = (GstGLDisplay *) gst_gl_display_x11_new_with_display (QX11Info::display());
     if (handle.canConvert<QGLXNativeContext>()) {
         QGLXNativeContext glxContext = handle.value<QGLXNativeContext>();
-        gstDisplay = (GstGLDisplay *) gst_gl_display_x11_new_with_display (QX11Info::display());
         gstContext = gst_gl_context_new_wrapped(gstDisplay, (guintptr) glxContext.context(), GST_GL_PLATFORM_GLX, GST_GL_API_OPENGL);
+
+        // display = (GstGLDisplay *) gst_gl_display_x11_new_with_display(glxContext.display());
     }
 #endif
 #if GST_GL_HAVE_PLATFORM_EGL
@@ -85,7 +83,7 @@ void GstreamerPipeline::notifyNewFrame(guint texture) {
     _wait.wait(&_mutex);
 }
 
-void GstreamerPipeline::frameDrawn() {
+void GstreamerPipeline::ulver() {
     QMutexLocker lock(&_mutex);
     _wait.wakeAll();
 }
@@ -100,17 +98,18 @@ void GstreamerPipeline::_open(const QString &filename) {
     _pipeline = GST_PIPELINE (gst_parse_launch
       ("filesrc name=filesrc ! "
        "decodebin ! "
-       "glupload name=glupload ! "
-       "glcolorconvert ! "
-       "video/x-raw(memory:GLMemory), format=(string)RGBA ! "
-       "fakesink name=fakesink sync=1"
+       "glimagesink name=glimagesink"
        , NULL));
 
     _filesrc = gst_bin_get_by_name(GST_BIN(_pipeline), "filesrc");
     g_assert(_filesrc != nullptr);
 
+    /*
     _glupload = gst_bin_get_by_name(GST_BIN(_pipeline), "glupload");
     g_assert(_glupload != nullptr);
+    */
+    _glimagesink = gst_bin_get_by_name (GST_BIN (_pipeline), "glimagesink");
+    g_assert(_glimagesink != nullptr);
 
     m_bus = gst_pipeline_get_bus (GST_PIPELINE (_pipeline));
     gst_bus_add_watch (m_bus, (GstBusFunc) bus_call, this);
@@ -118,10 +117,8 @@ void GstreamerPipeline::_open(const QString &filename) {
     g_signal_connect (m_bus, "sync-message", G_CALLBACK (sync_bus_call), this);
     gst_object_unref (m_bus);
 
-    GstElement *fakesink = gst_bin_get_by_name (GST_BIN (_pipeline), "fakesink");
-    g_object_set (G_OBJECT (fakesink), "signal-handoffs", TRUE, NULL);
-    g_signal_connect (fakesink, "handoff", G_CALLBACK (on_gst_buffer), this);
-    gst_object_unref (fakesink);
+    g_signal_connect (G_OBJECT (_glimagesink), "client-draw", G_CALLBACK (on_client_draw), this);
+    gst_object_unref (_glimagesink);
 
     QByteArray bytes = filename.toUtf8();
     g_object_set(_filesrc, "location", bytes.constData(), NULL);
@@ -139,6 +136,7 @@ void GstreamerPipeline::_pausePipeline() {
         return;
     }
 
+    /*
     GstPad* pad = gst_element_get_static_pad(_glupload, "src");
     GstCaps* caps = gst_pad_get_current_caps(pad);
     for (guint i = 0; i < gst_caps_get_size(caps); i++) {
@@ -149,6 +147,7 @@ void GstreamerPipeline::_pausePipeline() {
 
         emit videoSize(g_value_get_int(width), g_value_get_int(height));
     }
+    */
 
     _state = PipelineState::PAUSED;
 }
@@ -185,9 +184,11 @@ void GstreamerPipeline::_stopPipeline() {
     gst_bus_remove_watch(m_bus);
     gst_object_unref (m_bus);
 
+    /*
     if (_glupload != nullptr) {
         gst_object_unref(_glupload);
     }
+    */
     if (_filesrc != nullptr) {
         gst_object_unref(_filesrc);
     }
@@ -200,21 +201,46 @@ void GstreamerPipeline::_stopPipeline() {
 
 /* fakesink handoff callback */
 void GstreamerPipeline::on_gst_buffer (GstElement * element, GstBuffer * buf, GstPad * pad, GstreamerPipeline * p) {
+    Q_UNUSED (pad)
+    Q_UNUSED (element)
+
+    /* ref then push buffer to use it in qt */
+    gst_buffer_ref (buf);
+    p->queue_input_buf.put (buf);
+
+    if (p->queue_input_buf.size () > 3) {
+        p->notifyNewFrame(0);
+    }
+
+    /* pop then unref buffer we have finished to use in qt */
+    while (p->queue_output_buf.size () > 0) {
+        GstBuffer *buf_old = (p->queue_output_buf.get ());
+        if (buf_old)
+            gst_buffer_unref (buf_old);
+    }
+    // qDebug() << Q_FUNC_INFO << "new frame";
+}
+
+void GstreamerPipeline::on_client_draw(GstElement * glsink, GstGLContext * context, GstSample * sample, GstreamerPipeline * p) {
     GstVideoFrame v_frame;
     GstVideoInfo v_info;
-    GstVideoMeta *v_meta;
     guint texture = 0;
+    GstBuffer *buf = gst_sample_get_buffer (sample);
+    GstCaps *caps = gst_sample_get_caps (sample);
 
-    v_meta = gst_buffer_get_video_meta (buf);
-    gst_video_info_set_format (&v_info, v_meta->format, v_meta->width, v_meta->height);
+    gst_video_info_from_caps (&v_info, caps);
 
     if (!gst_video_frame_map (&v_frame, &v_info, buf, (GstMapFlags) (GST_MAP_READ | GST_MAP_GL))) {
       g_warning ("Failed to map the video buffer");
       return;
     }
+
     texture = *(guint *) v_frame.data[0];
 
+    // qDebug() << Q_FUNC_INFO << "Notifying";
     p->notifyNewFrame(texture);
+    // qDebug() << Q_FUNC_INFO << "Done";
+
     gst_video_frame_unmap (&v_frame);
 }
 

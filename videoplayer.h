@@ -69,7 +69,7 @@ signals:
     void finished();
 
 public slots:
-    void newFrame();
+    void newFrame(GLuint texture);
     void initPipeline();
 
 protected:
@@ -89,6 +89,8 @@ private:
     QPoint lastPos;
     QOpenGLShaderProgram *program = nullptr;
     QOpenGLBuffer vbo;
+    QMatrix4x4 matrix;
+    GLuint textureId = 0;
 
 private slots:
     void videoSize(int width, int height);

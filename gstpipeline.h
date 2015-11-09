@@ -1,15 +1,16 @@
 #ifndef GSTPIPELINE_H
 #define GSTPIPELINE_H
 
-#include <QThread>
-
 #define GST_USE_UNSTABLE_API
 #include <gst/gl/gstglcontext.h>
 #include <gst/gl/gstgldisplay.h>
 
-#include <asyncqueue.h>
+#include <QThread>
+#include <QOpenGLWidget>
 
-class QOpenGLContext;
+#include <QMutex>
+#include <QWaitCondition>
+
 class GstreamerPipeline : public QObject
 {
     Q_OBJECT
@@ -19,14 +20,12 @@ public:
 
     void initialize(QOpenGLContext *context);
     void open(const QString& filename) { emit openFileRequested(filename); }
-    void notifyNewFrame() {emit newFrameReady();}
+    void notifyNewFrame(GLuint texture);
+    void frameDrawn();
     void stop();
-
-    AsyncQueue<GstBuffer*> queue_input_buf;
-    AsyncQueue<GstBuffer*> queue_output_buf;
 signals:
     void finished();
-    void newFrameReady();
+    void newFrameReady(GLuint texture);
     void videoSize(int width, int height);
 
     void openFileRequested(const QString& filename);
@@ -37,6 +36,11 @@ private:
         PAUSED,
         PLAYING
     };
+
+    QThread _thread;
+
+    QMutex _mutex;
+    QWaitCondition _wait;
 
     PipelineState _state = PipelineState::STOPPED;
     GstBus* m_bus;
