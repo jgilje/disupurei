@@ -176,7 +176,9 @@ void VideoPlayer::videoSize(int width, int height) {
     _videoWidth = width;
     _videoHeight = height;
 
+    makeCurrent();
     makeObject();
+    doneCurrent();
 }
 
 void VideoPlayer::newFrame (GLuint texture) {
