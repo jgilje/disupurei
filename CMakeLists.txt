@@ -7,6 +7,12 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(FindASan)
+include(FindMSan)
+include(FindTSan)
+include(FindUBSan)
+
 find_package(Qt5Network)
 find_package(Qt5Widgets)
 
