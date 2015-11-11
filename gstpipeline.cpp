@@ -223,7 +223,7 @@ gboolean GstreamerPipeline::bus_call (GstBus * bus, GstMessage * msg, GstreamerP
 
     switch (GST_MESSAGE_TYPE (msg)) {
     case GST_MESSAGE_EOS:
-        qDebug ("End-of-stream received. Stopping.");
+        // qDebug ("End-of-stream received. Stopping.");
         p->_stopPipeline();
         p->_signalFinished();
         break;
