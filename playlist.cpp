@@ -45,8 +45,8 @@ Playlist::Playlist(QObject *parent) : QObject(parent) {
 
 const Entry &Playlist::next() {
     ++_playbackIterator;
-    if (_playbackIterator >= _entries.constEnd()) {
-        _playbackIterator = _entries.constBegin();
+    if (_playbackIterator >= _entries.end()) {
+        _playbackIterator = _entries.begin();
     }
 
     return *_playbackIterator;
@@ -78,7 +78,7 @@ void Playlist::cleanupStaleEntries() {
 void Playlist::downloadEntries() {
     if (_refreshIterator == _refreshEntries.end()) {
         _entries = _refreshEntries;
-        _playbackIterator = _entries.constEnd();
+        _playbackIterator = _entries.end();
         emit playlistAvailable();
 
         cleanupStaleEntries();

@@ -46,7 +46,7 @@ private:
     QVector<Entry> _entries;
     QVector<Entry> _refreshEntries;
     QVector<Entry>::Iterator _refreshIterator;
-    QVector<Entry>::ConstIterator _playbackIterator;
+    QVector<Entry>::Iterator _playbackIterator;
     QString _mac;
     QString _url;
 
