@@ -24,6 +24,8 @@ public:
     Q_ENUM(Type)
 
     explicit Playlist(QObject *parent = 0);
+    ~Playlist();
+
     const Entry& next();
 
     void macAddress(const QString& address);

@@ -43,6 +43,10 @@ Playlist::Playlist(QObject *parent) : QObject(parent) {
     _metadataRefreshTimer.start(10000);
 }
 
+Playlist::~Playlist() {
+    _metadataRefreshTimer.stop();
+}
+
 const Entry &Playlist::next() {
     ++_playbackIterator;
     if (_playbackIterator >= _entries.end()) {
