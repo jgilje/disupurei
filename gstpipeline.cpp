@@ -22,7 +22,20 @@
 	#include <QtPlatformHeaders/QWGLNativeContext>
 #endif
 
+#ifdef Q_OS_WIN
+GThread* _loop_thread;
+GMainLoop *_loop;
+void _g_main_loop_thread(void) {
+    g_main_loop_run(_loop);
+    g_thread_exit(0);
+}
+#endif
+
 GstreamerPipeline::GstreamerPipeline() {
+#ifdef Q_OS_WIN
+    _loop = g_main_loop_new(g_main_context_default(), false);
+    _loop_thread = g_thread_new("glib_main_loop", (GThreadFunc) _g_main_loop_thread, this);
+#endif
     moveToThread(&_thread);
     setObjectName("GstreamerPipeline");
 
@@ -31,6 +44,11 @@ GstreamerPipeline::GstreamerPipeline() {
 }
 
 GstreamerPipeline::~GstreamerPipeline() {
+#ifdef Q_OS_WIN
+    g_main_loop_quit(_loop);
+    g_thread_join(_loop_thread);
+#endif
+
     frameDrawn();
     stop();
 
