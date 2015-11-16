@@ -19,8 +19,6 @@ VideoPlayer::VideoPlayer(QWidget *parent)
 VideoPlayer::~VideoPlayer() {
     makeCurrent();
     vbo.destroy();
-
-    delete program;
     doneCurrent();
 }
 
@@ -76,7 +74,7 @@ void VideoPlayer::initializeGL()
             "}\n";
     fshader->compileSourceCode(fsrc);
 
-    program = new QOpenGLShaderProgram;
+    program = std::unique_ptr<QOpenGLShaderProgram>(new QOpenGLShaderProgram);
     program->addShader(vshader);
     program->addShader(fshader);
     program->bindAttributeLocation("vertex", PROGRAM_VERTEX_ATTRIBUTE);

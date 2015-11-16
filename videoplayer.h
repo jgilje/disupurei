@@ -83,11 +83,10 @@ private:
     int _videoWidth = 1024;
     int _videoHeight = 1024;
 
-    GstBuffer *frame = nullptr;
     std::unique_ptr<GstreamerPipeline> _pipeline;
     QColor clearColor;
     QPoint lastPos;
-    QOpenGLShaderProgram *program = nullptr;
+    std::unique_ptr<QOpenGLShaderProgram> program;
     QOpenGLBuffer vbo;
     QMatrix4x4 matrix;
     GLuint textureId = 0;
