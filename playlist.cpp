@@ -49,7 +49,7 @@ Playlist::~Playlist() {
 
 const Entry &Playlist::next() {
     ++_playbackIterator;
-    if (_playbackIterator >= _entries.end()) {
+    if (_playbackIterator == _entries.end()) {
         _playbackIterator = _entries.begin();
     }
 
@@ -83,6 +83,7 @@ void Playlist::downloadEntries() {
     if (_refreshIterator == _refreshEntries.end()) {
         _entries = _refreshEntries;
         _playbackIterator = _entries.end();
+        --_playbackIterator;
         emit playlistAvailable();
 
         cleanupStaleEntries();
