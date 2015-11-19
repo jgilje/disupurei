@@ -82,4 +82,4 @@ target_link_libraries(disupurei
 )
 
 set_property(TARGET disupurei PROPERTY CXX_STANDARD 11)
-set_property(TARGET disupurei PROPERTY CXX_STANDARD_REQURED true)
+set_property(TARGET disupurei PROPERTY CXX_STANDARD_REQUIRED true)
