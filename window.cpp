@@ -48,6 +48,7 @@ DisupureiWindow::DisupureiWindow() : QOpenGLWidget() {
     _layout.addWidget(&_imagePlayer);
     setLayout(&_layout);
 
+    setCursor(Qt::BlankCursor);
     setWindowTitle(tr("disupurei"));
     _timer.setSingleShot(true);
 
