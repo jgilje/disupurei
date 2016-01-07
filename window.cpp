@@ -43,7 +43,7 @@
 #include <QtWidgets>
 #include <QTimer>
 
-DisupureiWindow::DisupureiWindow() {
+DisupureiWindow::DisupureiWindow() : QOpenGLWidget() {
     _layout.addWidget(&_videoPlayer);
     _layout.addWidget(&_imagePlayer);
     setLayout(&_layout);
