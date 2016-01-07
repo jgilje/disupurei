@@ -99,8 +99,8 @@ int main(int argc, char *argv[]) {
 
     QCommandLineParser parser;
     QCommandLineOption configOption = QCommandLineOption({{"c", "config"}, "View and set configuration"});
-    QCommandLineOption urlOption = QCommandLineOption({{"u", "url"}, "Set server URL", "url"});
-    QCommandLineOption macOption = QCommandLineOption({{"m", "mac"}, "Set/Override mac address", "mac"});
+    QCommandLineOption urlOption = QCommandLineOption({{"u", "url"}, "Set server URL\n(clear value with '.' as arg.)", "url"});
+    QCommandLineOption macOption = QCommandLineOption({{"m", "mac"}, "Set/Override mac address\n(clear value with '.' as arg.)", "mac"});
     QCommandLineOption windowOption = QCommandLineOption({{"w", "window"}, "Start in windowed mode"});
     parser.setApplicationDescription("disupurei - info screen client");
     parser.addHelpOption();
@@ -113,11 +113,21 @@ int main(int argc, char *argv[]) {
 
     if (parser.isSet(configOption)) {
         if (parser.isSet(urlOption)) {
-            settings.setValue("url", parser.value(urlOption));
+            auto val = parser.value(urlOption);
+            if (val == ".") {
+                settings.remove("url");
+            } else {
+                settings.setValue("url", val);
+            }
         }
 
         if (parser.isSet(macOption)) {
-            settings.setValue("mac", parser.value(macOption));
+            auto val = parser.value(macOption);
+            if (val == ".") {
+                settings.remove("mac");
+            } else {
+                settings.setValue("mac", val);
+            }
         }
 
         std::cout << cyan << "Configuration" << std::endl;
