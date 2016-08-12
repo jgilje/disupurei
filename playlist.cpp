@@ -107,15 +107,16 @@ void Playlist::onFetchEntryFinished() {
 
     if (reply->error() != QNetworkReply::NoError) {
         qWarning() << "Failed to download item at url" << _refreshIterator->url << ", removing entry";
+		_refreshEntries.erase(_refreshIterator);
     } else {
         QFile entryFile(_entryPath.filePath(_refreshIterator->fileId));
         entryFile.open(QIODevice::WriteOnly);
         entryFile.write(reply->readAll());
         _refreshIterator->loaded = true;
 
+		++_refreshIterator;
     }
 
-    ++_refreshIterator;
     downloadEntries();
 }
 
